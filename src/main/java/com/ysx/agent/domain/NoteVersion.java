@@ -12,6 +12,7 @@ import java.util.Date;
  */
 @TableName(value ="note_version")
 public class NoteVersion implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long note_id;

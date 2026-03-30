@@ -1,7 +1,8 @@
 package com.ysx.agent.mapper;
 
-import com.ysx.agent.domain.UserAccount;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ysx.agent.domain.UserAccount;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * @author ysx
@@ -11,6 +12,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface UserAccountMapper extends BaseMapper<UserAccount> {
 
+    UserAccount selectByUsernameForLogin(@Param("username") String username);
+
+    UserAccount selectByEmailForLogin(@Param("email") String email);
 }
 
 

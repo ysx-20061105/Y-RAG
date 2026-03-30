@@ -22,4 +22,20 @@
         id,username,email,password_hash,nickname,avatar_url,
         status,last_login_at,created_at,updated_at,deleted_at
     </sql>
+
+    <select id="selectByUsernameForLogin" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_account
+        where username = #{username}
+        limit 1
+    </select>
+
+    <select id="selectByEmailForLogin" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_account
+        where email = #{email}
+        limit 1
+    </select>
 </mapper>

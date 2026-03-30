@@ -12,6 +12,7 @@ import java.util.Date;
  */
 @TableName(value ="rag_document")
 public class RagDocument implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long kb_id;

@@ -1,7 +1,12 @@
 package com.ysx.agent.exception;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.stp.StpUtil;
 import com.ysx.agent.dto.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(NoteNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoteNotFound(NoteNotFoundException ex) {
@@ -42,6 +49,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
         ApiResponse<Void> body = ApiResponse.error(400, ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotLoginException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotLogin(NotLoginException ex, HttpServletRequest request) {
+        Object loginId = null;
+        try {
+            loginId = StpUtil.getLoginIdDefaultNull();
+        } catch (Exception ignored) {
+        }
+        String clientIp = request.getRemoteAddr();
+        log.info("LogoutEvent userId={} clientIp={} triggerType={}", loginId, clientIp, ex.getType());
+
+        ApiResponse<Void> body = ApiResponse.error(401, "UNAUTHORIZED");
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)

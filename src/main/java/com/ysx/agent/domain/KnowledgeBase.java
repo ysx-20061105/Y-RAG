@@ -12,6 +12,7 @@ import java.util.Date;
  */
 @TableName(value ="knowledge_base")
 public class KnowledgeBase implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long owner_user_id;

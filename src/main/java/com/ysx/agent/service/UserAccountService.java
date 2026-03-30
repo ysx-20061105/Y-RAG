@@ -1,7 +1,7 @@
 package com.ysx.agent.service;
 
-import com.ysx.agent.domain.UserAccount;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ysx.agent.domain.UserAccount;
 
 /**
 * @author ysx

@@ -12,6 +12,7 @@ import java.util.Date;
  */
 @TableName(value ="rag_retrieval_log")
 public class RagRetrievalLog implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long kb_id;

@@ -12,6 +12,7 @@ import java.util.Date;
  */
 @TableName(value ="rag_chunk")
 public class RagChunk implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long rag_document_id;

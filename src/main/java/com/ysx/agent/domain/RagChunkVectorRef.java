@@ -12,6 +12,7 @@ import java.util.Date;
  */
 @TableName(value ="rag_chunk_vector_ref")
 public class RagChunkVectorRef implements Serializable {
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long chunk_id;
