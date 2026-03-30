@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysx.agent.mapper.RagChunkVectorRefMapper">
+
+    <resultMap id="BaseResultMap" type="com.ysx.agent.domain.RagChunkVectorRef">
+            <id property="id" column="id" />
+            <result property="chunk_id" column="chunk_id" />
+            <result property="embedding_model" column="embedding_model" />
+            <result property="embedding_dim" column="embedding_dim" />
+            <result property="vector_store" column="vector_store" />
+            <result property="vector_id" column="vector_id" />
+            <result property="index_status" column="index_status" />
+            <result property="created_at" column="created_at" />
+            <result property="updated_at" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,chunk_id,embedding_model,embedding_dim,vector_store,vector_id,
+        index_status,created_at,updated_at
+    </sql>
+</mapper>

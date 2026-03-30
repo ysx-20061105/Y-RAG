@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysx.agent.mapper.RagDocumentMapper">
+
+    <resultMap id="BaseResultMap" type="com.ysx.agent.domain.RagDocument">
+            <id property="id" column="id" />
+            <result property="kb_id" column="kb_id" />
+            <result property="note_id" column="note_id" />
+            <result property="source_version_id" column="source_version_id" />
+            <result property="source_type" column="source_type" />
+            <result property="parse_status" column="parse_status" />
+            <result property="chunk_count" column="chunk_count" />
+            <result property="token_count" column="token_count" />
+            <result property="content_hash" column="content_hash" />
+            <result property="created_at" column="created_at" />
+            <result property="updated_at" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,kb_id,note_id,source_version_id,source_type,parse_status,
+        chunk_count,token_count,content_hash,created_at,updated_at
+    </sql>
+</mapper>

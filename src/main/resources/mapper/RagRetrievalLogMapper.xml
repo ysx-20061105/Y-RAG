@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysx.agent.mapper.RagRetrievalLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.ysx.agent.domain.RagRetrievalLog">
+            <id property="id" column="id" />
+            <result property="kb_id" column="kb_id" />
+            <result property="actor_user_id" column="actor_user_id" />
+            <result property="query_text" column="query_text" />
+            <result property="rewritten_query" column="rewritten_query" />
+            <result property="top_k" column="top_k" />
+            <result property="retrieved_chunk_ids" column="retrieved_chunk_ids" />
+            <result property="latency_ms" column="latency_ms" />
+            <result property="created_at" column="created_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,kb_id,actor_user_id,query_text,rewritten_query,top_k,
+        retrieved_chunk_ids,latency_ms,created_at
+    </sql>
+</mapper>

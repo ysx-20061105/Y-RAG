@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysx.agent.mapper.RagChunkMapper">
+
+    <resultMap id="BaseResultMap" type="com.ysx.agent.domain.RagChunk">
+            <id property="id" column="id" />
+            <result property="rag_document_id" column="rag_document_id" />
+            <result property="chunk_no" column="chunk_no" />
+            <result property="chunk_text" column="chunk_text" />
+            <result property="token_count" column="token_count" />
+            <result property="start_offset" column="start_offset" />
+            <result property="end_offset" column="end_offset" />
+            <result property="metadata_json" column="metadata_json" />
+            <result property="created_at" column="created_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,rag_document_id,chunk_no,chunk_text,token_count,start_offset,
+        end_offset,metadata_json,created_at
+    </sql>
+</mapper>

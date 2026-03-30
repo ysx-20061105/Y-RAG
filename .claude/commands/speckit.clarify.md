@@ -16,7 +16,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-Goal: Detect and reduce ambiguity or missing decision points in the active feature specification and record the clarifications directly in the spec file.
+Goal: Detect and reduce ambiguity or missing decision points in the active feature specification, align clarifications
+with the project database baseline when available, and record the clarifications directly in the spec file.
 
 Note: This clarification workflow is expected to run (and be completed) BEFORE invoking `/speckit.plan`. If the user explicitly states they are skipping clarification (e.g., exploratory spike), you may proceed, but must warn that downstream rework risk increases.
 
@@ -29,7 +30,20 @@ Execution steps:
    - If JSON parsing fails, abort and instruct user to re-run `/speckit.specify` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
-2. Load the current spec file. Perform a structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do not output raw map unless no questions will be asked).
+2. Load project database baseline from `doc/数据库设计.md` (if present). Extract internal, immutable baseline facts for
+   prioritization and conflict checks:
+    - Canonical ownership chain: `user_account (1) -> (N) knowledge_base (1) -> (N) note`.
+    - Core RAG chain: `note -> note_version`, `note -> rag_document -> rag_chunk -> rag_chunk_vector_ref`, and
+      `knowledge_base -> rag_retrieval_log`.
+    - Data constraints: `note.content` stores Markdown source only; `note.content_bytes <= 10485760`.
+    - Deletion semantics: foreign-key cascade from knowledge base to notes and RAG metadata.
+    - Security boundary: enforce tenant filtering by knowledge-base owner (for example `kb.owner_user_id = JWT.userId`).
+    - Vector storage boundary: MySQL stores vector references/metadata, not high-dimensional vector payload.
+    - If this file is missing/unreadable, continue with generic clarification mode (no hard failure).
+
+3. Load the current spec file. Perform a structured ambiguity, coverage, and DB-alignment scan using this taxonomy. For
+   each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do
+   not output raw map unless no questions will be asked).
 
    Functional Scope & Behavior:
    - Core user goals & success criteria
@@ -41,6 +55,12 @@ Execution steps:
    - Identity & uniqueness rules
    - Lifecycle/state transitions
    - Data volume / scale assumptions
+   - Mapping to canonical entities/tables (if DB baseline loaded): `user_account`, `knowledge_base`, `note`,
+     `note_version`, `rag_document`, `rag_chunk`, `rag_chunk_vector_ref`, `rag_retrieval_log`
+   - Referential integrity and delete behavior (cascade/restrict expectations)
+   - Canonical field-level constraints (for example content size limit and uniqueness constraints)
+   - Versioning/idempotency semantics (`note_version.version_no`, `rag_document.content_hash`)
+   - Query/access-path implications (index usage, keyset pagination assumptions)
 
    Interaction & UX Flow:
    - Critical user journeys / sequences
@@ -54,11 +74,13 @@ Execution steps:
    - Observability (logging, metrics, tracing signals)
    - Security & privacy (authN/Z, data protection, threat assumptions)
    - Compliance / regulatory constraints (if any)
+   - Data retention and auditability requirements for version and retrieval logs
 
    Integration & External Dependencies:
    - External services/APIs and failure modes
    - Data import/export formats
    - Protocol/versioning assumptions
+   - Vector store integration boundary and synchronization failure handling
 
    Edge Cases & Failure Handling:
    - Negative scenarios
@@ -85,18 +107,22 @@ Execution steps:
    - Clarification would not materially change implementation or validation strategy
    - Information is better deferred to planning phase (note internally)
 
-3. Generate (internally) a prioritized queue of candidate clarification questions (maximum 5). Do NOT output them all at once. Apply these constraints:
+4. Generate (internally) a prioritized queue of candidate clarification questions (maximum 5). Do NOT output them all at
+   once. Apply these constraints:
     - Maximum of 5 total questions across the whole session.
     - Each question must be answerable with EITHER:
        - A short multiple‑choice selection (2–5 distinct, mutually exclusive options), OR
        - A one-word / short‑phrase answer (explicitly constrain: "Answer in <=5 words").
     - Only include questions whose answers materially impact architecture, data modeling, task decomposition, test design, UX behavior, operational readiness, or compliance validation.
+   - If DB baseline is loaded, prioritize unresolved conflicts between spec and baseline before generic ambiguities.
     - Ensure category coverage balance: attempt to cover the highest impact unresolved categories first; avoid asking two low-impact questions when a single high-impact area (e.g., security posture) is unresolved.
     - Exclude questions already answered, trivial stylistic preferences, or plan-level execution details (unless blocking correctness).
+   - Do not ask questions whose answers are already explicitly fixed by the DB baseline unless the user is intentionally
+     requesting an override.
     - Favor clarifications that reduce downstream rework risk or prevent misaligned acceptance tests.
     - If more than 5 categories remain unresolved, select the top 5 by (Impact * Uncertainty) heuristic.
 
-4. Sequential questioning loop (interactive):
+5. Sequential questioning loop (interactive):
     - Present EXACTLY ONE question at a time.
     - For multiple‑choice questions:
        - **Analyze all options** and determine the **most suitable option** based on:
@@ -104,6 +130,7 @@ Execution steps:
           - Common patterns in similar implementations
           - Risk reduction (security, performance, maintainability)
           - Alignment with any explicit project goals or constraints visible in the spec
+         - Consistency with the loaded DB baseline (if available)
        - Present your **recommended option prominently** at the top with clear reasoning (1-2 sentences explaining why this is the best choice).
        - Format as: `**Recommended:** Option [X] - <reasoning>`
        - Then render all options as a Markdown table:
@@ -132,7 +159,7 @@ Execution steps:
     - Never reveal future queued questions in advance.
     - If no valid questions exist at start, immediately report no critical ambiguities.
 
-5. Integration after EACH accepted answer (incremental update approach):
+6. Integration after EACH accepted answer (incremental update approach):
     - Maintain in-memory representation of the spec (loaded once at start) plus the raw file contents.
     - For the first integrated answer in this session:
        - Ensure a `## Clarifications` section exists (create it just after the highest-level contextual/overview section per the spec template if missing).
@@ -141,30 +168,38 @@ Execution steps:
     - Then immediately apply the clarification to the most appropriate section(s):
        - Functional ambiguity → Update or add a bullet in Functional Requirements.
        - User interaction / actor distinction → Update User Stories or Actors subsection (if present) with clarified role, constraint, or scenario.
-       - Data shape / entities → Update Data Model (add fields, types, relationships) preserving ordering; note added constraints succinctly.
+      - Data shape / entities → Update Data Model (add fields, types, relationships) preserving ordering; note added
+        constraints succinctly and prefer canonical entity/field names from DB baseline when available.
+      - Data ownership / tenancy / access control ambiguity → Update relevant requirements with explicit ownership
+        checks consistent with `knowledge_base.owner_user_id`.
        - Non-functional constraint → Add/modify measurable criteria in Success Criteria > Measurable Outcomes (convert vague adjective to metric or explicit target).
        - Edge case / negative flow → Add a new bullet under Edge Cases / Error Handling (or create such subsection if template provides placeholder for it).
        - Terminology conflict → Normalize term across spec; retain original only if necessary by adding `(formerly referred to as "X")` once.
+      - If an accepted answer intentionally deviates from DB baseline, make that override explicit in spec
+        assumptions/constraints so downstream planning can apply schema migration consciously.
     - If the clarification invalidates an earlier ambiguous statement, replace that statement instead of duplicating; leave no obsolete contradictory text.
     - Save the spec file AFTER each integration to minimize risk of context loss (atomic overwrite).
     - Preserve formatting: do not reorder unrelated sections; keep heading hierarchy intact.
     - Keep each inserted clarification minimal and testable (avoid narrative drift).
 
-6. Validation (performed after EACH write plus final pass):
+7. Validation (performed after EACH write plus final pass):
    - Clarifications session contains exactly one bullet per accepted answer (no duplicates).
    - Total asked (accepted) questions ≤ 5.
    - Updated sections contain no lingering vague placeholders the new answer was meant to resolve.
    - No contradictory earlier statement remains (scan for now-invalid alternative choices removed).
    - Markdown structure valid; only allowed new headings: `## Clarifications`, `### Session YYYY-MM-DD`.
    - Terminology consistency: same canonical term used across all updated sections.
+   - If DB baseline was loaded: no unresolved contradiction remains on core entities, ownership chain, delete behavior,
+     or core size/security constraints unless explicitly marked as override.
 
-7. Write the updated spec back to `FEATURE_SPEC`.
+8. Write the updated spec back to `FEATURE_SPEC`.
 
-8. Report completion (after questioning loop ends or early termination):
+9. Report completion (after questioning loop ends or early termination):
    - Number of questions asked & answered.
    - Path to updated spec.
    - Sections touched (list names).
    - Coverage summary table listing each taxonomy category with Status: Resolved (was Partial/Missing and addressed), Deferred (exceeds question quota or better suited for planning), Clear (already sufficient), Outstanding (still Partial/Missing but low impact).
+   - DB alignment summary: `Aligned` / `Override required` / `Deferred`.
    - If any Outstanding or Deferred remain, recommend whether to proceed to `/speckit.plan` or run `/speckit.clarify` again later post-plan.
    - Suggested next command.
 
@@ -177,5 +212,9 @@ Behavior rules:
 - Respect user early termination signals ("stop", "done", "proceed").
 - If no questions asked due to full coverage, output a compact coverage summary (all categories Clear) then suggest advancing.
 - If quota reached with unresolved high-impact categories remaining, explicitly flag them under Deferred with rationale.
+- If DB baseline exists and high-impact schema/security conflicts remain unresolved, do not silently proceed; flag them
+  explicitly and recommend another `/speckit.clarify` pass before `/speckit.plan`.
+- Do not invent alternative names for canonical core entities (`user_account`, `knowledge_base`, `note`, `note_version`,
+  `rag_document`, `rag_chunk`, `rag_chunk_vector_ref`, `rag_retrieval_log`) unless user explicitly requests an override.
 
 Context for prioritization: $ARGUMENTS
