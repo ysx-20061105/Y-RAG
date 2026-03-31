@@ -19,9 +19,10 @@ public class SaTokenConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 全局 Sa-Token 拦截器，目前仅对笔记相关接口做登录校验
+        // 全局 Sa-Token 拦截器，对受保护业务接口做登录校验
         registry.addInterceptor(new SaInterceptor(handler -> {
             SaRouter.match("/notes/**", r -> StpUtil.checkLogin());
+            SaRouter.match("/knowledge-bases/**", r -> StpUtil.checkLogin());
         })).addPathPatterns("/**");
     }
 }

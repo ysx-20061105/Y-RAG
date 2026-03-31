@@ -1,12 +1,12 @@
 package com.ysx.agent.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.ysx.agent.dto.ApiResponse;
 import com.ysx.agent.dto.CreateNoteRequest;
 import com.ysx.agent.dto.NoteListResponse;
 import com.ysx.agent.dto.NoteResponse;
 import com.ysx.agent.dto.UpdateNoteRequest;
 import com.ysx.agent.service.NoteService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +29,8 @@ public class NoteController {
     }
 
     @PostMapping
-    public ApiResponse<NoteResponse> create(@Valid @RequestBody CreateNoteRequest request, HttpServletRequest httpRequest) {
-        Long userId = extractUserId(httpRequest);
+    public ApiResponse<NoteResponse> create(@Valid @RequestBody CreateNoteRequest request) {
+        Long userId = extractUserId();
         NoteResponse resp = noteService.createNote(request, userId);
         ApiResponse<NoteResponse> api = ApiResponse.success(resp);
         maybeAttachRemainingCapacity(api, resp.getContent());
@@ -38,8 +38,8 @@ public class NoteController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<NoteResponse> detail(@PathVariable("id") Long id, HttpServletRequest httpRequest) {
-        Long userId = extractUserId(httpRequest);
+    public ApiResponse<NoteResponse> detail(@PathVariable("id") Long id) {
+        Long userId = extractUserId();
         NoteResponse resp = noteService.getNoteById(id, userId);
         return ApiResponse.success(resp);
     }
@@ -48,18 +48,16 @@ public class NoteController {
     public ApiResponse<NoteListResponse> list(
             @RequestParam("kbId") Long kbId,
             @RequestParam(value = "page", required = false) Integer page,
-            @RequestParam(value = "size", required = false) Integer size,
-            HttpServletRequest httpRequest) {
-        Long userId = extractUserId(httpRequest);
+            @RequestParam(value = "size", required = false) Integer size) {
+        Long userId = extractUserId();
         NoteListResponse resp = noteService.listNotes(kbId, page, size, userId);
         return ApiResponse.success(resp);
     }
 
     @PutMapping("/{id}")
     public ApiResponse<NoteResponse> update(@PathVariable("id") Long id,
-                                            @Valid @RequestBody UpdateNoteRequest request,
-                                            HttpServletRequest httpRequest) {
-        Long userId = extractUserId(httpRequest);
+                                            @Valid @RequestBody UpdateNoteRequest request) {
+        Long userId = extractUserId();
         NoteResponse resp = noteService.updateNote(id, request, userId);
         ApiResponse<NoteResponse> api = ApiResponse.success(resp);
         maybeAttachRemainingCapacity(api, resp.getContent());
@@ -67,19 +65,15 @@ public class NoteController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable("id") Long id, HttpServletRequest httpRequest) {
-        Long userId = extractUserId(httpRequest);
+    public ApiResponse<Void> delete(@PathVariable("id") Long id) {
+        Long userId = extractUserId();
         noteService.deleteNote(id, userId);
         return ApiResponse.success(null);
     }
 
-    private Long extractUserId(HttpServletRequest request) {
-        Object attr = request.getAttribute("userId");
-        if (attr instanceof Long) {
-            return (Long) attr;
-        }
-        if (attr instanceof String) {
-            return Long.parseLong((String) attr);
+    private Long extractUserId() {
+        if (StpUtil.isLogin()) {
+            return StpUtil.getLoginIdAsLong();
         }
         throw new IllegalArgumentException("未认证用户");
     }

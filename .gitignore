@@ -1,6 +1,5 @@
 ### CUSTOM###
 application-local.yaml
-CLAUDE.md
 doc
 
 HELP.md
@@ -38,3 +37,9 @@ build/
 .vscode/
 *.class
 *.jar
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.log
+.env*

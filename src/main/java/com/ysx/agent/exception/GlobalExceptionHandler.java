@@ -30,6 +30,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(KnowledgeBaseNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleKnowledgeBaseNotFound(KnowledgeBaseNotFoundException ex) {
+        ApiResponse<Void> body = ApiResponse.error(404, ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(KnowledgeBaseAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleKnowledgeBaseAccessDenied(KnowledgeBaseAccessDeniedException ex) {
+        ApiResponse<Void> body = ApiResponse.error(403, ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(KnowledgeBaseConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleKnowledgeBaseConflict(KnowledgeBaseConflictException ex) {
+        ApiResponse<Void> body = ApiResponse.error(409, ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidation(ValidationException ex) {
         ApiResponse<Void> body = ApiResponse.error(413, ex.getMessage());

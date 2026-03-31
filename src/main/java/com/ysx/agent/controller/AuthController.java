@@ -4,8 +4,10 @@ import com.ysx.agent.dto.ApiResponse;
 import com.ysx.agent.dto.AuthResponse;
 import com.ysx.agent.dto.LoginRequest;
 import com.ysx.agent.dto.RegisterRequest;
+import com.ysx.agent.dto.UserInfoResponse;
 import com.ysx.agent.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,5 +44,11 @@ public class AuthController {
     public ApiResponse<Void> logout() {
         authService.logout();
         return ApiResponse.success(null);
+    }
+
+    @GetMapping("/info")
+    public ApiResponse<UserInfoResponse> getCurrentUser() {
+        UserInfoResponse userInfo = authService.getCurrentUser();
+        return ApiResponse.success(userInfo);
     }
 }

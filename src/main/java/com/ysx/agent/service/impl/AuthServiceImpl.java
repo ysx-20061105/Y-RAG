@@ -5,6 +5,7 @@ import com.ysx.agent.domain.UserAccount;
 import com.ysx.agent.dto.AuthResponse;
 import com.ysx.agent.dto.LoginRequest;
 import com.ysx.agent.dto.RegisterRequest;
+import com.ysx.agent.dto.UserInfoResponse;
 import com.ysx.agent.mapper.UserAccountMapper;
 import com.ysx.agent.service.AuthService;
 import org.slf4j.Logger;
@@ -113,6 +114,25 @@ public class AuthServiceImpl implements AuthService {
         if (StpUtil.isLogin()) {
             StpUtil.logout();
         }
+    }
+
+    @Override
+    public UserInfoResponse getCurrentUser() {
+        if (!StpUtil.isLogin()) {
+            return null;
+        }
+        Long userId = StpUtil.getLoginIdAsLong();
+        UserAccount account = userAccountMapper.selectById(userId);
+        if (account == null) {
+            return null;
+        }
+        return new UserInfoResponse(
+                account.getId(),
+                account.getUsername(),
+                account.getEmail(),
+                account.getNickname(),
+                account.getStatus()
+        );
     }
 
     private UserAccount findByIdentifier(LoginRequest.IdentifierType type, String identifier) {

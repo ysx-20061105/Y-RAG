@@ -102,7 +102,7 @@ public class NoteServiceImpl implements NoteService {
 
     private KnowledgeBase loadOwnedKnowledgeBase(Long kbId, Long userId) {
         KnowledgeBase kb = knowledgeBaseMapper.selectById(kbId);
-        if (kb == null || !Objects.equals(kb.getOwner_user_id(), userId)) {
+        if (kb == null || !Objects.equals(kb.getUserId(), userId)) {
             throw new NoteAccessDeniedException("无权限访问该知识库");
         }
         return kb;
