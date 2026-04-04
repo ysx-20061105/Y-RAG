@@ -1,3 +1,4 @@
+/*
 package com.ysx.agent.rag.etl;
 
 import jakarta.annotation.Resource;
@@ -29,3 +30,4 @@ public class YRAGVectorStoreConfig {
         return vs;
     }
 }
+*/

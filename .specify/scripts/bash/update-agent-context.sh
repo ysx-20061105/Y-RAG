@@ -23,7 +23,7 @@
 #    - Supports multiple AI agent formats and directory structures
 #
 # 4. Content Generation
-#    - Generates language-specific build/test commands
+#    - Generates language-specific build/Test commands
 #    - Creates appropriate project directory structures
 #    - Updates technology stacks and recent changes sections
 #    - Maintains consistent formatting and timestamps

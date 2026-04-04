@@ -1,3 +1,4 @@
+/*
 package com.ysx.agent.rag.etl;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +8,12 @@ import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.embedding.EmbeddingModel;
 import java.lang.reflect.Method;
 
+*/
 /**
  * Factory to create a VectorStore instance with optional Qdrant backend via reflection.
  * Falls back to SimpleVectorStore if Qdrant classes are not present or on error.
- */
+ *//*
+
 @Component
 public class VectorStoreFactory {
     @Autowired
@@ -73,3 +76,4 @@ public class VectorStoreFactory {
         return "kb_" + s.replaceAll("[^a-zA-Z0-9_]", "_");
     }
 }
+*/

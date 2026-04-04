@@ -6,14 +6,25 @@ server:
 spring:
   application:
     name: Y-RAG
+  profiles:
+    active: local
   ai:
     vectorstore:
       qdrant:
-        host: localhost
+        host: 192.168.237.134
         port: 6334
+        scheme: http
         initialize-schema: true
         enabled: true
         collection-name-prefix: kb_
+    ollama:
+      base-url: http://127.0.0.1:11434
+      embedding:
+        enabled: true
+        model: qwen3-embedding:0.6b
+        options:
+          temperature: 0
+
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
