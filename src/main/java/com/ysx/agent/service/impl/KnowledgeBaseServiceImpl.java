@@ -1,19 +1,20 @@
 package com.ysx.agent.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ysx.agent.domain.KnowledgeBase;
+import com.ysx.agent.domain.Note;
 import com.ysx.agent.dto.CreateKnowledgeBaseRequest;
 import com.ysx.agent.dto.KnowledgeBaseListResponse;
 import com.ysx.agent.dto.KnowledgeBaseResponse;
 import com.ysx.agent.dto.UpdateKnowledgeBaseRequest;
 import com.ysx.agent.exception.KnowledgeBaseAccessDeniedException;
-import com.ysx.agent.exception.KnowledgeBaseConflictException;
 import com.ysx.agent.exception.KnowledgeBaseNotFoundException;
 import com.ysx.agent.mapper.KnowledgeBaseMapper;
+import com.ysx.agent.mapper.NoteMapper;
 import com.ysx.agent.service.KnowledgeBaseService;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,8 +37,11 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
 
     private final KnowledgeBaseMapper knowledgeBaseMapper;
 
-    public KnowledgeBaseServiceImpl(KnowledgeBaseMapper knowledgeBaseMapper) {
+    private final NoteMapper noteMapper;
+
+    public KnowledgeBaseServiceImpl(KnowledgeBaseMapper knowledgeBaseMapper,NoteMapper noteMapper) {
         this.knowledgeBaseMapper = knowledgeBaseMapper;
+        this.noteMapper = noteMapper;
     }
 
     @Override
@@ -169,6 +173,26 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         response.setPage((int) resultPage.getCurrent());
         response.setSize((int) resultPage.getSize());
         return response;
+    }
+
+    /**
+     * 根据知识库id获取笔记列表
+     *
+     * @param kbId
+     * @return
+     */
+    @Override
+    public List<Note> getNotsByKnowledgeId(Long kbId) {
+        if (kbId == null||kbId<=0) {
+            log.error("kbId is null or less than 0");
+            return null;
+        }
+        KnowledgeBase knowledgeBase = this.getById(kbId);
+        if (knowledgeBase == null) {
+            log.error("kbId is not exist");
+            return null;
+        }
+        return noteMapper.selectList(new QueryWrapper<Note>().eq("kb_id", kbId));
     }
 
     private KnowledgeBase loadByIdWithAccessCheck(Long id, Long userId, boolean allowDeleted) {

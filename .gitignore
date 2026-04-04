@@ -1,6 +1,7 @@
 ### CUSTOM###
 application-local.yaml
 doc
+.sisyphus
 
 HELP.md
 target/
