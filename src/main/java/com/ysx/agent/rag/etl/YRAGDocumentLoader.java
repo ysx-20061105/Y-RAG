@@ -53,4 +53,25 @@ public class YRAGDocumentLoader {
         }
         return allDocuments;
     }
+
+    /**
+     * markdown文档加载
+     *
+     * @param note 笔记
+     * @return
+     */
+    public List<Document> loadMarkdownsByNote(Note note) {
+        byte[] contentBytes = note.getContent().getBytes(StandardCharsets.UTF_8);
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(contentBytes));
+        MarkdownDocumentReaderConfig config = MarkdownDocumentReaderConfig.builder()
+                .withHorizontalRuleCreateDocument(true) // 开启分割
+                .withIncludeCodeBlock(false)            // 排除代码块
+                .withIncludeBlockquote(false)           // 排除引用
+                // 添加元数据，方便以后知道这段话出自哪篇笔记
+                .withAdditionalMetadata("note_id", note.getId() != null ? note.getId().toString() : "unknown")
+                .withAdditionalMetadata("note_title", note.getTitle() != null ? note.getTitle() : "无标题")
+                .build();
+        MarkdownDocumentReader reader = new MarkdownDocumentReader(resource, config);
+        return reader.get();
+    }
 }

@@ -27,13 +27,13 @@ public class YRAGQdrantConfig {
         return new QdrantClient(grpcClientBuilder.build());
     }
 
-    @Bean
-    public VectorStore vectorStore(QdrantClient qdrantClient, EmbeddingModel ollamaEmbeddingModel) {
-        return QdrantVectorStore.builder(qdrantClient, ollamaEmbeddingModel)
-                .collectionName(qdrantProperties.getCollectionNamePrefix())
-                .initializeSchema(qdrantProperties.isInitializeSchema())
-                .batchingStrategy(new TokenCountBatchingStrategy())
-                .build();
-    }
+//    @Bean
+//    public VectorStore vectorStore(QdrantClient qdrantClient, EmbeddingModel ollamaEmbeddingModel) {
+//        return QdrantVectorStore.builder(qdrantClient, ollamaEmbeddingModel)
+//                .collectionName(qdrantProperties.getCollectionNamePrefix())
+//                .initializeSchema(qdrantProperties.isInitializeSchema())
+//                .batchingStrategy(new TokenCountBatchingStrategy())
+//                .build();
+//    }
 
 }

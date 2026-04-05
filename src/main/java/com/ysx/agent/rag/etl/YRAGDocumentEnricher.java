@@ -14,22 +14,22 @@ import java.util.List;
  * SummaryMetadataEnricher:使用 AI生成文档摘要并添加到元数据。
  */
 @Component
-class YRAGDocumentEnricher {
+public class YRAGDocumentEnricher {
 
     private final ChatModel openAiChatModel;
 
     YRAGDocumentEnricher(ChatModel openAiChatModel) {
         this.openAiChatModel = openAiChatModel;
     }
-      
-      // 关键词元信息增强器
-    List<Document> enrichDocumentsByKeyword(List<Document> documents) {
+
+    // 关键词元信息增强器
+    public List<Document> enrichDocumentsByKeyword(List<Document> documents) {
         KeywordMetadataEnricher enricher = new KeywordMetadataEnricher(this.openAiChatModel, 5);
         return enricher.apply(documents);
     }
   
     // 摘要元信息增强器
-    List<Document> enrichDocumentsBySummary(List<Document> documents) {
+    public List<Document> enrichDocumentsBySummary(List<Document> documents) {
         SummaryMetadataEnricher enricher = new SummaryMetadataEnricher(openAiChatModel,
             List.of(SummaryMetadataEnricher.SummaryType.PREVIOUS, SummaryMetadataEnricher.SummaryType.CURRENT, SummaryMetadataEnricher.SummaryType.NEXT));
         return enricher.apply(documents);

@@ -11,9 +11,8 @@ spring:
   ai:
     vectorstore:
       qdrant:
-        host: 192.168.237.134
+        host: 172.17.137.83
         port: 6334
-        scheme: http
         initialize-schema: true
         enabled: true
         collection-name-prefix: kb_
@@ -24,6 +23,7 @@ spring:
         model: qwen3-embedding:0.6b
         options:
           temperature: 0
+          dimension: 768
 
   mvc:
     pathmatch:

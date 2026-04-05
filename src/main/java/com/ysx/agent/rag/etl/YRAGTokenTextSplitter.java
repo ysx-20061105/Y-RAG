@@ -10,7 +10,7 @@ import java.util.List;
  * 转换
  */
 @Component
-class YRAGTokenTextSplitter {
+public class YRAGTokenTextSplitter {
 
     public List<Document> splitDocuments(List<Document> documents) {
         TokenTextSplitter splitter = new TokenTextSplitter();

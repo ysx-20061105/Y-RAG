@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "spring.ai.vectorstore.qdrant")
 public class QdrantProperties {
-    private String host = "192.168.237.134";
-    private int port = 6333;
+    private String host = "172.17.137.83";
+    private int port = 6334;
     private boolean initializeSchema = true;
     private String collectionNamePrefix = "kb_";
     private boolean enabled = true;

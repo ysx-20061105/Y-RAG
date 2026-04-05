@@ -23,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 知识库服务实现类
+ * 处理知识库的 CRUD 操作，包含归属权校验、审计日志等
+ */
 @Service
 public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, KnowledgeBase>
         implements KnowledgeBaseService {
@@ -39,11 +43,15 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
 
     private final NoteMapper noteMapper;
 
-    public KnowledgeBaseServiceImpl(KnowledgeBaseMapper knowledgeBaseMapper,NoteMapper noteMapper) {
+    public KnowledgeBaseServiceImpl(KnowledgeBaseMapper knowledgeBaseMapper, NoteMapper noteMapper) {
         this.knowledgeBaseMapper = knowledgeBaseMapper;
         this.noteMapper = noteMapper;
     }
 
+    /**
+     * 创建知识库
+     * 验证必填字段（名称），处理可选字段（描述、分类、标签）
+     */
     @Override
     @Transactional
     public KnowledgeBaseResponse createKnowledgeBase(CreateKnowledgeBaseRequest request, Long userId) {
@@ -77,6 +85,10 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         }
     }
 
+    /**
+     * 更新知识库
+     * 支持部分更新，使用乐观锁机制（lastKnownUpdatedAt）处理并发冲突
+     */
     @Override
     @Transactional
     public KnowledgeBaseResponse updateKnowledgeBase(Long id, UpdateKnowledgeBaseRequest request, Long userId) {
@@ -119,6 +131,10 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         }
     }
 
+    /**
+     * 删除知识库（软删除）
+     * 设置 deleted_at 时间戳，同时更新 status 为 0
+     */
     @Override
     @Transactional
     public void deleteKnowledgeBase(Long id, Long userId) {
@@ -136,12 +152,19 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         }
     }
 
+    /**
+     * 获取知识库详情
+     */
     @Override
     public KnowledgeBaseResponse getKnowledgeBaseById(Long id, Long userId) {
         KnowledgeBase kb = loadByIdWithAccessCheck(id, userId, false);
         return toResponse(kb);
     }
 
+    /**
+     * 分页查询知识库列表
+     * 支持关键词（名称/描述模糊匹配）、分类、标签过滤
+     */
     @Override
     public KnowledgeBaseListResponse listKnowledgeBases(String keyword,
                                                         String category,
@@ -176,14 +199,14 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
     }
 
     /**
-     * 根据知识库id获取笔记列表
+     * 根据知识库ID获取关联的笔记列表
      *
-     * @param kbId
-     * @return
+     * @param kbId 知识库ID
+     * @return 该知识库下的所有笔记列表，若知识库不存在返回null
      */
     @Override
     public List<Note> getNotsByKnowledgeId(Long kbId) {
-        if (kbId == null||kbId<=0) {
+        if (kbId == null || kbId <= 0) {
             log.error("kbId is null or less than 0");
             return null;
         }
@@ -195,6 +218,16 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         return noteMapper.selectList(new QueryWrapper<Note>().eq("kb_id", kbId));
     }
 
+    /**
+     * 加载知识库并验证用户归属权
+     *
+     * @param id           知识库ID
+     * @param userId       用户ID
+     * @param allowDeleted 是否允许返回已删除的知识库
+     * @return 知识库实体
+     * @throws KnowledgeBaseNotFoundException     知识库不存在或已删除
+     * @throws KnowledgeBaseAccessDeniedException 用户无权限访问该知识库
+     */
     private KnowledgeBase loadByIdWithAccessCheck(Long id, Long userId, boolean allowDeleted) {
         KnowledgeBase kb = knowledgeBaseMapper.selectById(id);
         if (kb == null) {
@@ -209,10 +242,16 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         return kb;
     }
 
+    /**
+     * 将实体转换为响应DTO，同时解码标签列表
+     */
     private KnowledgeBaseResponse toResponse(KnowledgeBase kb) {
         return KnowledgeBaseResponse.fromEntity(kb, decodeTags(kb.getTags()));
     }
 
+    /**
+     * 校验必填文本字段
+     */
     private String normalizeRequiredText(String value, String message) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException(message);
@@ -220,6 +259,9 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         return value.trim();
     }
 
+    /**
+     * 规范化可选文本字段，null或空返回null
+     */
     private String normalizeOptionalText(String value) {
         if (value == null) {
             return null;
@@ -228,6 +270,9 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         return normalized.isEmpty() ? null : normalized;
     }
 
+    /**
+     * 规范化标签列表：去重、过滤null和空字符串、校验非法标签
+     */
     private List<String> normalizeTags(List<String> tags) {
         if (tags == null || tags.isEmpty()) {
             return Collections.emptyList();
@@ -242,6 +287,9 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         return normalized.stream().distinct().collect(Collectors.toList());
     }
 
+    /**
+     * 标签列表编码为逗号分隔字符串
+     */
     private String encodeTags(List<String> tags) {
         if (tags == null || tags.isEmpty()) {
             return null;
@@ -249,6 +297,9 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
         return String.join(",", tags);
     }
 
+    /**
+     * 逗号分隔字符串解码为标签列表
+     */
     private List<String> decodeTags(String tags) {
         if (tags == null || tags.trim().isEmpty()) {
             return Collections.emptyList();
@@ -259,6 +310,10 @@ public class KnowledgeBaseServiceImpl extends ServiceImpl<KnowledgeBaseMapper, K
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 审计日志记录
+     * 记录知识库操作类型、ID、操作用户、时间、结果和原因
+     */
     private void auditLog(String operationType,
                           Long knowledgeBaseId,
                           Long operatorUserId,
