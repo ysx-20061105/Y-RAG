@@ -17,6 +17,7 @@ import com.ysx.agent.mapper.NoteVersionMapper;
 import com.ysx.agent.rag.etl.QdrantProperties;
 import com.ysx.agent.rag.etl.YRAGDocumentEnricher;
 import com.ysx.agent.rag.etl.YRAGDocumentLoader;
+import com.ysx.agent.rag.etl.YRAGMarkdownSplitter;
 import com.ysx.agent.service.NoteService;
 import com.ysx.agent.utils.QdrantUtils;
 import io.qdrant.client.QdrantClient;
@@ -104,9 +105,6 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements No
         note.setContentBytes(bytes);
         noteMapper.insert(note);
 
-        // 异步处理任务 添加到向量数据库
-        noteTaskExecutor.execute(() -> this.addQdrantVector(note));
-
         return convert(note);
     }
 
@@ -121,8 +119,10 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements No
         // 加载文档
         List<Document> documents = yragDocumentLoader.loadMarkdownsByNote(note);
         // 转换 分割文本并添加摘要
-        TokenTextSplitter splitter = new TokenTextSplitter();
-        documents = splitter.apply(documents);
+//        TokenTextSplitter splitter = new TokenTextSplitter();
+//        documents = splitter.apply(documents);
+        YRAGMarkdownSplitter yragMarkdownSplitter = new YRAGMarkdownSplitter();
+        documents = yragMarkdownSplitter.splitDocuments(documents);
         //关键词元数据增强器
         documents = documentEnricher.enrichDocumentsByKeyword(documents);
         documents = documentEnricher.enrichDocumentsBySummary(documents);
@@ -174,8 +174,13 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements No
         }
         String name = qdrantProperties.getCollectionNamePrefix() + note.getKbId();
         try {
-            // 删除原来的
-            QdrantUtils.deleteByNoteId(qdrantClient, name, noteId);
+            boolean collectionInQdrant = QdrantUtils.isCollectionInQdrant(qdrantClient, name);
+            if (!collectionInQdrant) {
+                QdrantUtils.getCollectionName(qdrantClient, name, ollamaEmbeddingModel.dimensions());
+            }else{
+                // 删除原来的
+                QdrantUtils.deleteByNoteId(qdrantClient, name, noteId);
+            }
             // 添加新的
             this.addQdrantVector(note);
             log.info("updateQdrantVector success");
