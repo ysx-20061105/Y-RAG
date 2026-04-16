@@ -2,6 +2,8 @@
 application-local.yaml
 doc
 .sisyphus
+specs
+.specify
 
 HELP.md
 target/
