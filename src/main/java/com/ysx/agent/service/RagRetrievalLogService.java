@@ -1,13 +1,29 @@
 package com.ysx.agent.service;
 
 import com.ysx.agent.domain.RagRetrievalLog;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.ysx.agent.rag.config.HybridSearchConfig;
+
+import java.util.List;
 
 /**
-* @author ysx
-* @description 针对表【rag_retrieval_log】的数据库操作Service
-* @createDate 2026-03-30 12:13:01
-*/
-public interface RagRetrievalLogService extends IService<RagRetrievalLog> {
+ * 检索日志服务接口
+ */
+public interface RagRetrievalLogService {
 
+    /**
+     * 异步记录检索日志
+     */
+    void logRetrievalAsync(Long kbId, Long userId, String queryText,
+                          String rewrittenQuery, HybridSearchConfig config,
+                          int resultCount, long latencyMs);
+
+    /**
+     * 查询最近的检索日志
+     */
+    List<RagRetrievalLog> getRecentLogs(int limit);
+
+    /**
+     * 根据知识库ID查询检索日志
+     */
+    List<RagRetrievalLog> getLogsByKbId(Long kbId, int limit);
 }

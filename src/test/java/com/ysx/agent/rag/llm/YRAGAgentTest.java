@@ -17,10 +17,17 @@ class YRAGAgentTest {
     private YRAGSearch yragSearch;
 
     @Test
-    void testDoChatWithRag(){
+    void testDoChatWithRagVector(){
         String collectionName="kb_"+1;
 //        String queryText = yragSearch.doQueryRewrite("java中什么是包装类型？？？？");
-        String result = agent.doChatWithRag(collectionName, "java中什么是包装类型？？？", "default");
+        String result = agent.doChatWithRagVector(collectionName, "java中什么是包装类型？？？", "default");
+        Assertions.assertNotNull(result);
+        System.out.println(result);
+    }
+    @Test
+    void testDoChatWithRag(){
+        String collectionName="kb_"+1;
+        ChatWithRagResult result = agent.doChatWithRag(collectionName, "java中什么是包装类型？？？", "default");
         Assertions.assertNotNull(result);
         System.out.println(result);
     }
