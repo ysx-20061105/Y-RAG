@@ -7,7 +7,6 @@ import com.ysx.agent.service.HybridSearchService;
 import com.ysx.agent.service.RagRetrievalLogService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,7 @@ import java.util.Map;
  * 提供检索配置管理和检索日志查看接口
  */
 @RestController
-@RequestMapping("/rag/retrieval")
+@RequestMapping("/retrieval")
 @Validated
 public class RagRetrievalController {
 

@@ -11,7 +11,6 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.qdrant.QdrantVectorStore;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,11 +53,9 @@ public class KeywordRetrieverImpl implements KeywordRetriever {
                     .similarityThreshold(0.0)  // 获取所有匹配结果
                     .build();
 
-            List<Document> results = vectorStore.similaritySearch(searchRequest);
-
             // 过滤包含关键词的文档（因为similaritySearch是向量搜索，不是payload搜索）
             // 这里返回的是向量搜索的结果，如需严格关键词匹配需使用Qdrant原生API
-            return results;
+            return vectorStore.similaritySearch(searchRequest);
         } catch (Exception e) {
             log.error("Keyword retrieval failed: {}", e.getMessage(), e);
             throw new RuntimeException("Keyword retrieval failed: " + e.getMessage(), e);

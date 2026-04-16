@@ -11,7 +11,7 @@ spring:
   ai:
     vectorstore:
       qdrant:
-        host: 172.17.137.83
+        host: 192.168.237.134
         port: 6334
         initialize-schema: true
         enabled: true
@@ -39,6 +39,10 @@ sa-token:
   # 7 天最大存活，2 小时空闲超时
   timeout: 604800
   active-timeout: 7200
+  is-read-header: true
+  token-name: yrag-token
+  is-log: true
+  token-style: uuid
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
@@ -64,6 +68,11 @@ springdoc:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.ysx.agent.controller
+# RAG 配置
+rag:
+  chat-memory:
+    dir: data/chat-memory
+
 # knife4j
 knife4j:
   enable: true
